@@ -19,25 +19,24 @@ main =
 getRandomBools :: [Bool]
 getRandomBools = take (width + 2) (randoms (mkStdGen 1)) :: [Bool]
 
-doRule110 :: [Char] -> Int -> IO ()
+doRule110 :: String -> Int -> IO ()
 doRule110 list@(_:xs) count
-  | count == iterations = do
-    print (init xs)
+  | count == iterations = print (init xs)
   | otherwise = do
     print (init xs)
     calculateNext list count
 
-calculateNext :: [Char] -> Int -> IO ()
+calculateNext :: String -> Int -> IO ()
 calculateNext list count =
   let decoratedList = getTransposedList list
   in doRule110 [getCell pre x suc | [pre, x, suc] <- decoratedList] (count + 1)
 
-getTransposedList :: [Char] -> [[Char]]
+getTransposedList :: String -> [String]
 getTransposedList list =
-  transpose [(blank:list), list, ((tail list) ++ [blank])]
+  transpose [blank:list, list, tail list ++ [blank]]
 
 getCell :: Char -> Char -> Char -> Char
-getCell pre x suc = if (pre `notBut` x || x `xor` suc) then symbol else blank
+getCell pre x suc = if pre `notBut` x || x `xor` suc then symbol else blank
 
 xor :: Char -> Char -> Bool
 a `xor` b = not (isAlive a && isAlive b) && (isAlive a || isAlive b)
