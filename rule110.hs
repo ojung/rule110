@@ -1,6 +1,8 @@
 module Main where
 
 import Data.List
+import System.Environment
+import System.Exit
 import System.Random
 
 blank :: Char
@@ -9,18 +11,19 @@ blank = ' '
 symbol :: Char
 symbol = '@'
 
-width :: Int
-width = 140
-
-iterations :: Integer
-iterations = 500
-
 main :: IO ()
 main = do
-  gen <- newStdGen
-  let random_bools = take (width + 2) $ randomRs (True, False) gen :: [Bool]
-      first = [if x then symbol else blank | x <- random_bools]
-  prettyPrint $ doRule110 first [] 0
+  args <- getArgs
+  case args of
+    [width, iterations] -> do
+      gen <- newStdGen
+      let w = read width + 2
+          bools = take w $ randomRs (True, False) gen
+          first = [if x then symbol else blank | x <- bools]
+      prettyPrint $ doRule110 first [] $ read iterations
+    _ -> do
+      putStrLn "Error! Usage: ./rule110 <width> <iterations>"
+      exitFailure
 
 prettyPrint :: [String] -> IO ()
 prettyPrint [] = return ()
@@ -31,8 +34,8 @@ prettyPrint (x:xs) = do
 
 doRule110 :: String -> [String] -> Integer -> [String]
 doRule110 prev acc count
-  | count == iterations = acc
-  | otherwise = doRule110 next_gen (acc ++ [next_gen]) (count + 1)
+  | count == 0 = acc
+  | otherwise = doRule110 next_gen (acc ++ [next_gen]) (count - 1)
     where decorated_list = transpose [blank:prev, prev, tail prev ++ [blank]]
           next_gen = [getCell pre x suc | [pre, x, suc] <- decorated_list]
 
