@@ -8,32 +8,27 @@ symbol = '@'
 width = 140
 iterations = 50
 
-isAlive :: Char -> Bool
-isAlive a = a == symbol
-
 main :: IO ()
 main =
-  let first = [if x then symbol else blank | x <- getRandomBools]
-  in doRule110 first 0
+  prettyPrint $ doRule110 first [] 0
+  where first = [if x then symbol else blank | x <- getRandomBools]
+
+prettyPrint :: [String] -> IO ()
+prettyPrint [x] = putStrLn x
+prettyPrint (x:xs) = do
+  putStrLn x
+  prettyPrint xs
 
 getRandomBools :: [Bool]
-getRandomBools = take (width + 2) (randoms (mkStdGen 1)) :: [Bool]
+getRandomBools = take (width + 2) $ randoms (mkStdGen 1) :: [Bool]
 
-doRule110 :: String -> Int -> IO ()
-doRule110 list@(_:xs) count
-  | count == iterations = print (init xs)
-  | otherwise = do
-    print (init xs)
-    calculateNext list count
-
-calculateNext :: String -> Int -> IO ()
-calculateNext list count =
-  let decoratedList = getTransposedList list
-  in doRule110 [getCell pre x suc | [pre, x, suc] <- decoratedList] (count + 1)
-
-getTransposedList :: String -> [String]
-getTransposedList list =
-  transpose [blank:list, list, tail list ++ [blank]]
+doRule110 :: String -> [String] -> Integer -> [String]
+doRule110 prev@(_:xs) acc count
+  | count == iterations = acc
+  | otherwise =
+    let next = [getCell pre x suc | [pre, x, suc] <- decoratedList]
+    in doRule110 next (acc ++ [next]) (count + 1)
+  where decoratedList = transpose [blank:prev, prev, tail prev ++ [blank]]
 
 getCell :: Char -> Char -> Char -> Char
 getCell pre x suc = if pre `notBut` x || x `xor` suc then symbol else blank
@@ -43,4 +38,7 @@ a `xor` b = not (isAlive a && isAlive b) && (isAlive a || isAlive b)
 
 notBut :: Char -> Char -> Bool
 a `notBut` b = not (isAlive a) && isAlive b
+
+isAlive :: Char -> Bool
+isAlive a = a == symbol
 
