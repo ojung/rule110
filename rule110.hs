@@ -9,18 +9,17 @@ width = 140
 iterations = 50
 
 main :: IO ()
-main =
+main = do
+  gen <- newStdGen
+  let randoms = take (width + 2) $ randomRs (True, False) gen :: [Bool]
+      first = [if x then symbol else blank | x <- randoms]
   prettyPrint $ doRule110 first [] 0
-  where first = [if x then symbol else blank | x <- getRandomBools]
 
 prettyPrint :: [String] -> IO ()
 prettyPrint [x] = putStrLn x
 prettyPrint (x:xs) = do
   putStrLn x
   prettyPrint xs
-
-getRandomBools :: [Bool]
-getRandomBools = take (width + 2) $ randoms (mkStdGen 1) :: [Bool]
 
 doRule110 :: String -> [String] -> Integer -> [String]
 doRule110 prev@(_:xs) acc count
